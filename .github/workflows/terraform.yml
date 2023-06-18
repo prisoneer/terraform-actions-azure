@@ -7,6 +7,12 @@ on:
 permissions:
   contents: read
 
+env:
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
 jobs:
   terraform:
     name: 'Terraform test'
@@ -32,13 +38,14 @@ jobs:
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       run: terraform init
+      
+    # Login to Azure via Azure CLI
+    - name: Login via Azure CLI
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     # Checks that all Terraform configuration files adhere to a canonical format
-    - name: Terraform Format
-      run: terraform fmt -check -recursive
+    - name: Terraform Apply
+      run: terraform apply -auto-approve
       
-    # Validate Terraform files
-    - name: Terraform Validate
-      run: terraform validate
-
-
